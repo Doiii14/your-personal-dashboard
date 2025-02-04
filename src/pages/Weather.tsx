@@ -1,28 +1,31 @@
 import React, { useState } from "react";
-import WeatherWidget from "../widget/WeatherWidget"; // Importa il WeatherWidget
+import { useDispatch, useSelector } from "react-redux";
+import { setCity, fetchWeather } from "../redux/weatherSlice";
+import { RootState, AppDispatch } from "../redux/store";
+import WeatherWidget from "../widget/WeatherWidget";
 
 const Weather: React.FC = () => {
-  const [city, setCity] = useState<string>(""); // Stato per la città
-  const [search, setSearch] = useState<string>(""); // Stato per il testo della ricerca
+  const dispatch = useDispatch<AppDispatch>();
+  const city = useSelector((state: RootState) => state.weather.city);
+  const [search, setSearch] = useState("");
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value); // Aggiorna il testo della ricerca
+    setSearch(e.target.value);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setCity(search); // Passa il valore della ricerca alla città
+    dispatch(setCity(search));
+    dispatch(fetchWeather(search)); // Chiamiamo l'API solo una volta
   };
 
   return (
     <div className="p-6">
-      {/* Titolo e descrizione centrati */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-extrabold text-gray-800 mb-4">Weather Information</h1>
         <p className="text-lg text-gray-600">Here you can check the latest weather updates for your city.</p>
       </div>
-      
-      {/* Barra di ricerca per la città */}
+
       <div className="search-bar mb-8 text-center">
         <form onSubmit={handleSearchSubmit} className="flex justify-center items-center">
           <input
@@ -41,10 +44,7 @@ const Weather: React.FC = () => {
         </form>
       </div>
 
-      {/* Passa il valore della città al widget */}
-      {city && <WeatherWidget city={city} />}
-      
-      {/* Se la città non è stata inserita, mostra un messaggio */}
+      {city && <WeatherWidget />}
       {!city && (
         <div className="text-center mt-4 text-gray-500">
           Please enter a city to see the weather.
